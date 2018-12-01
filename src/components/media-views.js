@@ -127,14 +127,14 @@ function createVideoTexture(url) {
   });
 }
 
-function createPlaneMesh(texture) {
+function createMesh(texture,shape) {
   const material = new THREE.MeshBasicMaterial();
   material.side = THREE.DoubleSide;
   material.transparent = true;
   material.map = texture;
   material.needsUpdate = true;
 
-  const geometry = new THREE.PlaneGeometry();
+  const geometry = shape;
   return new THREE.Mesh(geometry, material);
 }
 
@@ -234,7 +234,17 @@ AFRAME.registerComponent("media-video", {
     time: { type: "number" },
     videoPaused: { type: "boolean" },
     tickRate: { default: 1000 }, // ms interval to send time interval updates
-    syncTolerance: { default: 2 }
+    syncTolerance: { default: 2 },
+    shape: { default: new THREE.PlaneGeometry() }
+    /*
+    For videospheres you can override this default with:
+
+        small videosphere (Good if you want the video as a small object you can move around)
+          shape: { new THREE.SphereGeometry(1,20,20) }
+
+        large videosphere (Good if you want to cover the entire scene with the videosphere acting more as a skybox)
+          shape: { new THREE.SphereGeometry(1,20,20) }
+    */
   },
 
   init() {
@@ -350,7 +360,7 @@ AFRAME.registerComponent("media-video", {
     }
 
     if (!this.mesh) {
-      this.mesh = createPlaneMesh(texture);
+      this.mesh = createMesh(texture,this.data.shape);
       this.el.setObject3D("mesh", this.mesh);
     } else {
       const { material } = this.mesh;
@@ -435,7 +445,8 @@ AFRAME.registerComponent("media-video", {
 AFRAME.registerComponent("media-image", {
   schema: {
     src: { type: "string" },
-    contentType: { type: "string" }
+    contentType: { type: "string" },
+    shape: { default: new THREE.PlaneGeometry() }
   },
 
   remove() {
@@ -483,7 +494,7 @@ AFRAME.registerComponent("media-image", {
     }
 
     if (!this.mesh) {
-      this.mesh = createPlaneMesh(texture);
+      this.mesh = createMesh(texture,this.data.shape);
       this.el.setObject3D("mesh", this.mesh);
     } else {
       const { material } = this.mesh;
